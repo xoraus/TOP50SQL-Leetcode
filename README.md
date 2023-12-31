@@ -19,7 +19,7 @@
       + [Rising Temperature ](#rising-temperature)
       + [Average Time of Process per Machine ](#average-time-of-process-per-machine)
       + [Employee Bonus ](#employee-bonus)
-      + [Students and Examinations 🔸 ](#students-and-examinations-)
+      + [Students and Examinations](#students-and-examinations)
       + [Managers with at Least 5 Direct Reports ](#managers-with-at-least-5-direct-reports)
       + [Confirmation : Rate ](#confirmation-rate)
    * [Basic Aggregate Functions ](#basic-aggregate-functions)
@@ -139,22 +139,125 @@ WHERE LENGTH(content) > 15
 
 <!-- TOC --><a name="replace-employee-id-with-the-unique-identifier"></a>
 ###  Replace Employee ID With The Unique Identifier 
+Leetcode 1378 : Solution - Write a solution to show the unique ID of each user, If a user does not have a unique ID replace just show null. Return the result table in any order. 
+
+```sql
+SELECT EU.unique_id, E.name
+FROM Employees E
+LEFT JOIN EmployeeUNI EU ON E.id = EU.id 
+```
+
 <!-- TOC --><a name="product-sales-analysis-i"></a>
 ###  Product Sales Analysis I 
+Leetcode 1068 : Solution - Write a solution to report the product_name, year, and price for each sale_id in the Sales table. Return the resulting table in any order.
+
+```sql
+SELECT P.product_name, S.year, S.price
+FROM Sales AS S
+JOIN Product AS P ON S.product_id = P.product_id;  
+```
+
 <!-- TOC --><a name="customer-who-visited-but-did-not-make-any-transactions"></a>
 ###  Customer Who Visited but Did Not Make Any Transactions 
+
+Leetcode 1581 : Solution - Write a solution to find the IDs of the users who visited without making any transactions and the number of times they made these types of visits. Return the result table sorted in any order.
+
+```sql
+SELECT v.customer_id, COUNT(v.visit_id) as count_no_trans
+FROM Visits v
+LEFT JOIN Transactions t ON v.visit_id = t.visit_id
+WHERE t.transaction_id is NULL
+GROUP BY (v.customer_id) 
+```
+
 <!-- TOC --><a name="rising-temperature"></a>
 ###  Rising Temperature 
+
+Leetcode 197 : Solution - Write a solution to find all dates' Id with higher temperatures compared to its previous dates (yesterday). Return the result table in any order.
+
+```sql
+SELECT weather.id AS 'Id'
+FROM weather
+JOIN weather w ON DATEDIFF(weather.recordDate, w.recordDate) = 1
+        AND weather.Temperature > w.Temperature;
+ ```
+
 <!-- TOC --><a name="average-time-of-process-per-machine"></a>
 ###  Average Time of Process per Machine 
+
+Leetcode 1661 : Solution - There is a factory website that has several machines each running the same number of processes. Write a solution to find the average time each machine takes to complete a process. The time to complete a process is the 'end' timestamp minus the 'start' timestamp. The average time is calculated by the total time to complete every process on the machine divided by the number of processes that were run. The resulting table should have the machine_id along with the average time as processing_time, which should be rounded to 3 decimal places. Return the result table in any order.
+
+```sql
+SELECT machine_id, ROUND(AVG(end_time - start_time), 3) AS processing_time
+FROM (
+    SELECT machine_id, process_id, 
+           MAX(CASE WHEN activity_type = 'start' THEN timestamp END) AS start_time,
+           MAX(CASE WHEN activity_type = 'end' THEN timestamp END) AS end_time
+    FROM Activity
+    GROUP BY machine_id, process_id
+) AS ProcessTimes
+GROUP BY machine_id; 
+```
 <!-- TOC --><a name="employee-bonus"></a>
 ###  Employee Bonus 
-<!-- TOC --><a name="students-and-examinations-"></a>
-###  Students and Examinations 🔸 
+
+Leetcode 577 : Solution - Write a solution to report the name and bonus amount of each employee with a bonus less than 1000. Return the result table in any order.
+
+```sql
+SELECT E.name, B.bonus
+FROM Employee E
+LEFT JOIN Bonus B ON E.empId = B.empId
+WHERE B.bonus < 1000 or B.bonus IS NULL
+ ```
+
+<!-- TOC --><a name="students-and-examinations"></a>
+###  Students and Examinations 
+
+Leetcode 1280 : Solution - Write a solution to find the number of times each student attended each exam. Return the result table ordered by student_id and subject_name.
+
+```sql
+# Approach 1
+
+SELECT s.student_id, s.student_name, sub.subject_name, COALESCE(e.attended_exams, 0) AS attended_exams
+FROM Students s
+CROSS JOIN Subjects sub
+LEFT JOIN (
+    SELECT student_id, subject_name, COUNT(*) AS attended_exams
+    FROM Examinations
+    GROUP BY student_id, subject_name
+) e USING (student_id, subject_name)
+ORDER BY s.student_id, sub.subject_name;  
+```
+
 <!-- TOC --><a name="managers-with-at-least-5-direct-reports"></a>
-###  Managers with at Least 5 Direct Reports 
+###  Managers with at Least 5 Direct Reports
+
+Leetcode 570 : Solution - Write a solution to find managers with at least five direct reports. Return the result table in any order.
+
+```sql
+SELECT name
+FROM Employee 
+WHERE id IN
+    (SELECT managerId
+    FROM Employee E
+    GROUP BY (managerId)
+    HAVING COUNT(id) >=5 ) 
+```
 <!-- TOC --><a name="confirmation-rate"></a>
 ###  Confirmation : Rate 
+
+Leetcode 1934 : Solution - The confirmation rate of a user is the number of 'confirmed' messages divided by the total number of requested confirmation messages. The confirmation rate of a user that did not request any confirmation messages is 0. Round the confirmation rate to two decimal places. Write a solution to find the confirmation rate of each user. Return the result table in any order.
+
+```sql
+SELECT s.user_id,
+       CASE
+           WHEN c.time_stamp IS NULL THEN 0.00
+           ELSE ROUND(SUM(CASE WHEN c.action = 'confirmed' THEN 1 ELSE 0 END) / COUNT(*), 2)
+       END AS confirmation_rate
+FROM Signups s
+LEFT JOIN Confirmations c ON s.user_id = c.user_id
+GROUP BY s.user_id;
+``` 
 
 <!-- TOC --><a name="basic-aggregate-functions"></a>
 ## Basic Aggregate Functions 
