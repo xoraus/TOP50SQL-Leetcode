@@ -1,6 +1,11 @@
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
 # [TOP50SQL-Leetcode](#top50sql-leetcode)
+
+
+![SQL Batch](https://assets.leetcode.com/static_assets/others/Top_SQL_50.gif)
+
+
    * [Select ](#select)
       + [Recyclable and Low Fat Products ](#recyclable-and-low-fat-products)
       + [Find Customer Referee ](#find-customer-referee)
